@@ -3,19 +3,15 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 
-def rot90(tensor, k=1, axes=[1, 2], name=None):
+def rot90(tensor, k=1, axes=[0, 1], name=None):
     axes = tuple(axes)
     if len(axes) != 2:
         raise ValueError("len(axes) must be 2.")
-
     tenor_shape = (tensor.get_shape().as_list())
     dim = len(tenor_shape)
-
     if axes[0] == axes[1] or np.absolute(axes[0] - axes[1]) == dim:
         raise ValueError("Axes must be different.")
-
     if (axes[0] >= dim or axes[0] < -dim or axes[1] >= dim or axes[1] < -dim):
-
         raise ValueError("Axes={} out of range for tensor of ndim={}.".format(
             axes, dim))
     k %= 4
@@ -40,22 +36,17 @@ def rot90(tensor, k=1, axes=[1, 2], name=None):
             tf.transpose(tensor, perm=axes_list), axis=[axes[1]], name=name)
         return img270
 
-# 绘图
-def fig_2D_tensor(tensor):  # 绘图
-    #plt.matshow(tensor, cmap=plt.get_cmap('gray'))
-    plt.matshow(tensor)  # 彩色图像
-    # plt.colorbar() # 颜色条
-    plt.show()
-
 if __name__ == '__main__':
-    # 手写体数据集 加载
-    from tensorflow.examples.tutorials.mnist import input_data
-    mnist = input_data.read_data_sets("/home/lizhen/data/MNIST/", one_hot=True)
-
-    sess = tf.Session()
-    #选取数据 4D
-    images = mnist.train.images
-    img_raw = images[0, :]  # [0,784]
-    img = tf.reshape(img_raw, [-1, 28, 28, 1])  # img 现在是tensor
-    # 显 显示 待旋转的图片
-    fig_2D_tensor(sess.run(img)[0, :, :, 0])  # 提取ndarray
+    a = tf.placeholder(dtype=tf.int32, shape=[3, 3, 1])
+    a1 = rot90(a, k=2)
+    a2 = rot90(a, k=1)
+    a3 = rot90(a, k=3)
+    a4 = tf.identity(a)
+    ax = tf.concat([a1, a2, a3, a4], axis=2)
+    X = tf.reshape(ax, [3, 3, 2, 2])
+    X = tf.transpose(X, [0, 2, 1, 3])
+    X = tf.reshape(X, [6, 6])
+    n = [[[1], [2], [3]], [[4], [5], [6]], [[7], [8], [9]]]
+    with tf.Session() as sess:
+        out = sess.run(X, {a:n})
+    print(out)
